@@ -29,12 +29,13 @@
   
 ````
   Program     = {(TModule|TRun|TMemoryDef|TFailureDef)}.
-  Memory   = Ident'['Number']''['Number']'.
-  TMemoryDef  = 'memory' Memory.
+  Memory   = Ident'['Number']''['Number']'[NewLines].
+  TMemoryDef  = 'memory' Memory[NewLines].
   FailureDef  = 'st0'|'st1'.
-  TFailureDef = 'let' Memory FailureDef.
-  TRun        = 'run' ['strict'] Ident 'on' Ident.
-  TModule     = 'module' Ident '{' {Test} '}'.
-  Test        = 'test' Ident '{' {TestOp '}'.
-  TestOp      = (=>|<=)'('Op ',' Op')'.
+  TFailureDef = 'let' Memory FailureDef[NewLines].
+  TRun        = 'run' ['strict'] Ident 'on' Ident[NewLines].
+  TModule     = 'module' Ident [NewLines] '{' [NewLines] {Test} [NewLines] '}' [NewLines].
+  Test        = 'test' Ident [NewLines] '{' [NewLines] {TestOp} [NewLines] '}' [NewLines].
+  TestOp      = (=>|<=)'('Op ',' Op')'[NewLines].
   Op          = 'r0'|'r1'|'w0'|'w1'
+  NewLines    = [NL],{NewLines}.
