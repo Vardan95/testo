@@ -29,7 +29,7 @@
   
 ````
   Program     = {(TModule|TRun|TMemoryDef|TFailureDef)}.
-  Memory   = Ident'['Number']''['Number']'[NewLines].
+  Memory      = Ident'['Number']''['Number']'[NewLines].
   TMemoryDef  = 'memory' Memory[NewLines].
   FailureDef  = 'st0'|'st1'.
   TFailureDef = 'let' Memory FailureDef[NewLines].
