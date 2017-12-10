@@ -38,4 +38,4 @@
   Test        = 'test' Ident [NewLines] '{' [NewLines] {TestOp} [NewLines] '}' [NewLines].
   TestOp      = (=>|<=)'('Op ',' Op')'[NewLines].
   Op          = 'r0'|'r1'|'w0'|'w1'
-  NewLines    = [NL]{NewLines}.
+  NewLines    = NL{NewLines}.
