@@ -5,7 +5,7 @@
   ````
     module test_module_1 {
         test 1 {
-           =>(w0r0) // աճող հաջորդականությամբ գրել/կարդալ 0
+           =>(w0,r0) // աճող հաջորդականությամբ գրել/կարդալ 0
            // <= - նվազող հաջորդականությամբ
         }
     }
@@ -25,3 +25,16 @@
   ````
   
   Նաեւ ենթադրում եմ որ միայն թեստը աշխատել չի կարող, այն պետք է մաս կազմի ինչ որ մոդուլի, ընդ որում մոդուլը կարող է ունենալ զրո  ավել թեստեր.
+  
+  
+````
+  Program     = {(TModule|TRun|TMemoryDef|TFailureDef)}.
+  Memory   = Ident'['Number']''['Number']'.
+  TMemoryDef  = 'memory' Memory.
+  FailureDef  = 'st0'|'st1'.
+  TFailureDef = 'let' Memory FailureDef.
+  TRun        = 'run' ['strict'] Ident 'on' Ident.
+  TModule     = 'module' Ident '{' {Test} '}'.
+  Test        = 'test' Ident '{' {TestOp '}'.
+  TestOp      = (=>|<=)'('Op ',' Op')'.
+  Op          = 'r0'|'r1'|'w0'|'w1'
