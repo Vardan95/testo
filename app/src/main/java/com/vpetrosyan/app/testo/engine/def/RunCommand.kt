@@ -5,7 +5,7 @@ import com.vpetrosyan.app.testo.engine.error.RunError
 import com.vpetrosyan.app.testo.engine.RunStats
 
 class RunCommand(val test_module : String, var test_memory: String, var isStrcit: Boolean ) {
-    fun run(env: Environment) : RunStats {
+    fun run(env: Environment, onReport: ((message:String, isErrorLog: Boolean) -> Unit)?) : RunStats {
         if(!env.test_modules.containsKey(test_module)) {
             throw RunError("Module $test_module wasn't declared")
         }
@@ -18,6 +18,6 @@ class RunCommand(val test_module : String, var test_memory: String, var isStrcit
 
         val testMemory = env.memory_chunks[test_memory]
 
-        return testModule!!.run(testMemory!!, isStrcit)
+        return testModule!!.run(testMemory!!, isStrcit, onReport)
     }
 }

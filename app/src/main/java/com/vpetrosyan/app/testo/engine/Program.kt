@@ -12,6 +12,8 @@ class Program {
     var failure_defs = arrayListOf<FailureDef>()
     var run_commands = arrayListOf<RunCommand>()
 
+    var onReport: ((message:String, isErrorLog: Boolean) -> Unit)? = null
+
     fun run() {
         val env = Environment()
 
@@ -42,16 +44,20 @@ class Program {
         var totalTestPassed = 0
         var totalTestFailed = 0
 
-        Log.d("Testo", "========> Testing Started: <========")
+        val reportStart = "========> Testing Started: <========"
+        Log.d("Testo", reportStart)
+        onReport?.invoke(reportStart, false)
 
         for (runCommand in run_commands) {
-            val state =  runCommand.run(env)
+            val state =  runCommand.run(env, onReport)
             totalTestCount += state.test_count
             totalTestPassed += state.test_passed
             totalTestFailed += state.test_failed
         }
 
-        Log.d("Testo", "========> Testing finished: Total Test Count = $totalTestCount," +
-                " Total Tests Passed = $totalTestPassed, Total Tests Failed = $totalTestFailed <========")
+        val reportEnd = "========> Testing finished: Total Test Count = $totalTestCount," +
+                " Total Tests Passed = $totalTestPassed, Total Tests Failed = $totalTestFailed <========"
+        Log.d("Testo", reportEnd)
+        onReport?.invoke(reportEnd, false)
     }
 }

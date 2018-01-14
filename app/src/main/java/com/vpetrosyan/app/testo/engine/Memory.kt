@@ -14,8 +14,8 @@ class Memory constructor(val name: String, val height: Int, val width: Int) {
         failureTable.put(Pair(row, column), failure)
     }
 
-    fun get_failure_desc(row: Int, column: Int) : String {
-        return  failureTable[Pair(row, column)]!!.desc()
+    fun get_failure_desc(row: Int, column: Int) : String? {
+        return  failureTable[Pair(row, column)]?.desc()
     }
 
     fun force_write(m_val: Int, row: Int, column: Int) {

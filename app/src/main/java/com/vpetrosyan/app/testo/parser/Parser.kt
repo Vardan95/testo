@@ -12,6 +12,8 @@ class Parser constructor(source: String) {
 
     private val program = Program()
 
+    var onFail: ((failMessage:String) -> Unit)? = null
+
     fun parse(): Program?
     {
         try {
@@ -19,6 +21,7 @@ class Parser constructor(source: String) {
         }
         catch(se: ParseError) {
             Log.d("Testo",  "Error while parsing...", se)
+            onFail?.invoke(se.message!!)
             return null
         }
 
@@ -55,8 +58,13 @@ class Parser constructor(source: String) {
                 break
             }
 
-            if(lookahead.kind == Token.UNKNOWN) {
-                throw ParseError("Unknown ${lookahead.value} token at line ${lookahead.line}")
+            if(!lookahead.isKindOf(Token.KEYWORD_MEMORY, Token.KEYWORD_LET, Token.KEYWORD_RUN,
+                    Token.KEYWORD_MODULE, Token.EOF, Token.NEWLINE)) {
+                if(lookahead.kind == Token.UNKNOWN) {
+                    throw ParseError("Unknown ${lookahead.value} token at line ${lookahead.line}")
+                } else {
+                    throw ParseError("Wrong ${lookahead.value} token at line ${lookahead.line}")
+                }
             }
 
             parseNewLines()

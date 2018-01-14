@@ -10,21 +10,28 @@ class TestModule constructor(val name: String) {
         tests.add(test)
     }
 
-    fun run(memory: Memory, isStrict: Boolean) : RunStats {
+    fun run(memory: Memory, isStrict: Boolean, onReport: ((message:String, isErrorLog: Boolean) -> Unit)?) : RunStats {
         var failCount = 0
         var passedCount = 0
         var isAborted = false
 
-        Log.w("Testo", "====> Running module $name on ${memory.name} memory <====")
+        val startLog = "====> Running module $name on ${memory.name} memory <===="
+        Log.w("Testo", startLog)
+        onReport?.invoke(startLog, false)
 
         for (test in tests) {
             val testFullName = "${memory.name}.${test.name}"
             try {
                 test.run(memory)
                 passedCount++
-                Log.d("Testo", "Test $testFullName passed")
+                val testPassedLog = "Test $testFullName passed"
+                Log.d("Testo", testPassedLog)
+                onReport?.invoke(testPassedLog, false)
             } catch (te: TestError) {
-                Log.e("Testo", "Test $testFullName failed " + te.message)
+                val testFailedLog = "Test $testFullName failed " + te.message
+                Log.d("Testo", testFailedLog)
+                onReport?.invoke(testFailedLog, true)
+
                 failCount++
                 if(isStrict) {
                     isAborted = true
@@ -33,8 +40,10 @@ class TestModule constructor(val name: String) {
             }
         }
 
-        Log.w("Testo", "====> Module $name completed: Test Count = ${tests.size}," +
-                " Test Passed = $passedCount, Test Failed = $failCount, Aborted = $isAborted)<====")
+        val moduleStatLog = "====> Module $name completed: Test Count = ${tests.size}," +
+                " Test Passed = $passedCount, Test Failed = $failCount, Aborted = $isAborted)<===="
+        Log.w("Testo", moduleStatLog)
+        onReport?.invoke(moduleStatLog, false)
 
         return RunStats(test_count = tests.size, test_passed = passedCount, test_failed = failCount,
                 isAborted = isAborted)
