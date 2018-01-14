@@ -1,33 +1,34 @@
 package com.vpetrosyan.app.testo
 
+import android.content.Intent
+import android.content.Intent.ACTION_VIEW
+import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.text.InputType
-import android.util.Log
 import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.Button
 import android.widget.EditText
 import com.vpetrosyan.app.testo.parser.Parser
-import com.vpetrosyan.app.testo.parser.Scanner
-import com.vpetrosyan.app.testo.parser.Token
-import android.widget.TextView
-import android.text.Html
-import android.text.Html.FROM_HTML_SEPARATOR_LINE_BREAK_BLOCKQUOTE
-import android.text.Html.TO_HTML_PARAGRAPH_LINES_INDIVIDUAL
 import android.text.Spannable
-import android.text.Spanned
+import android.text.TextUtils
 import android.text.style.ForegroundColorSpan
+import android.widget.ImageButton
 import com.vpetrosyan.app.testo.engine.error.RunError
-import android.text.SpannableString
-import android.view.View.NOT_FOCUSABLE
+import android.R.attr.mimeType
+import android.app.Activity
+import android.util.Log
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 
 class MainActivity : AppCompatActivity() {
 
+    private val READ_REQUEST_CODE = 42
+    private val WRITE_REQUEST_CODE = 43
+
     var sourceText : EditText? = null
-    var resultText : TextView? = null
+    var resultText : EditText? = null
 
     val test_1_program = "memory mem1[100][100]\n" +
                     "memory mem2[50][100]\n\n" +
@@ -68,22 +69,36 @@ class MainActivity : AppCompatActivity() {
         resultText?.isFocusableInTouchMode = false
         resultText?.isFocusable = false
 
-        findViewById<Button>(R.id.btn_execute).setOnClickListener {
+        findViewById<ImageButton>(R.id.btn_execute).setOnClickListener {
             executeTest()
+        }
+
+        findViewById<ImageButton>(R.id.btn_save).setOnClickListener {
+            saveProgram()
+        }
+
+        findViewById<ImageButton>(R.id.btn_clear).setOnClickListener {
+            sourceText?.text?.clear()
+            resultText?.text?.clear()
         }
     }
 
     private fun executeTest() {
-        resultText?.text = ""
-        val parser = Parser(source = sourceText?.text.toString())
-        parser.onFail = { str: String -> updateResultScreen(str, true)}
-        val program = parser.parse()
+        resultText?.text?.clear()
 
-        try {
-            program?.onReport = { str: String, isFault:Boolean -> updateResultScreen(str = str, isFault = isFault)}
-            program?.run()
-        } catch (re: RunError) {
-            updateResultScreen(str = re.message + "", isFault = true)
+        val source_txt = sourceText?.text.toString()
+
+        if(!TextUtils.isEmpty(source_txt)) {
+            val parser = Parser(source = source_txt)
+            parser.onFail = { str: String -> updateResultScreen(str, true) }
+            val program = parser.parse()
+
+            try {
+                program?.onReport = { str: String, isFault: Boolean -> updateResultScreen(str = str, isFault = isFault) }
+                program?.run()
+            } catch (re: RunError) {
+                updateResultScreen(str = re.message + "", isFault = true)
+            }
         }
 
     }
@@ -108,6 +123,16 @@ class MainActivity : AppCompatActivity() {
                 sourceText?.setText(test_2_program)
                 return true
             }
+            R.id.open -> {
+                performFileSearch()
+                return true
+            }
+            R.id.about -> {
+                val intent = Intent(Intent.ACTION_VIEW)
+                intent.data = Uri.parse("https://github.com/Vardan95/testo/blob/master/Discussion.md")
+                startActivity(intent)
+                return true
+            }
         }
         return super.onOptionsItemSelected(item)
     }
@@ -126,5 +151,62 @@ class MainActivity : AppCompatActivity() {
         }
 
         spannableText.setSpan( ForegroundColorSpan(labelColor), start!!, end!!, 0)
+    }
+
+    fun performFileSearch() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+
+        intent.type = "*/*"
+
+        startActivityForResult(intent, READ_REQUEST_CODE)
+    }
+
+    fun saveProgram() {
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+
+        intent.type = "file/text"
+        intent.putExtra(Intent.EXTRA_TITLE, "testo_program_${System.currentTimeMillis()}.testo")
+        startActivityForResult(intent, WRITE_REQUEST_CODE)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if(resultCode != Activity.RESULT_OK) {
+            return
+        }
+
+        if(requestCode == WRITE_REQUEST_CODE) {
+            val shareIntent = Intent()
+            shareIntent.action = Intent.ACTION_SEND
+            shareIntent.putExtra(Intent.EXTRA_STREAM, data?.data)
+            shareIntent.type = "file/text"
+            startActivity(shareIntent)
+        }
+
+        if(requestCode == READ_REQUEST_CODE) {
+            val result = data?.data
+            sourceText?.setText(readTextFromUri(result!!))
+        }
+    }
+
+    private fun  readTextFromUri( uri : Uri) : String {
+        val inputStream = contentResolver.openInputStream(uri)
+        val reader = BufferedReader( InputStreamReader(inputStream))
+        val stringBuilder = StringBuilder()
+        var line = reader.readLine()
+
+        while (line != null) {
+            stringBuilder.append(line)
+            line = reader.readLine()
+        }
+
+        inputStream.close()
+        reader.close()
+        return stringBuilder.toString()
     }
 }
