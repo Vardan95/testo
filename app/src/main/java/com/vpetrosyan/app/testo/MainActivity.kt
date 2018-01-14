@@ -1,13 +1,11 @@
 package com.vpetrosyan.app.testo
 
 import android.content.Intent
-import android.content.Intent.ACTION_VIEW
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Button
 import android.widget.EditText
 import com.vpetrosyan.app.testo.parser.Parser
 import android.text.Spannable
@@ -15,10 +13,7 @@ import android.text.TextUtils
 import android.text.style.ForegroundColorSpan
 import android.widget.ImageButton
 import com.vpetrosyan.app.testo.engine.error.RunError
-import android.R.attr.mimeType
 import android.app.Activity
-import android.util.Log
-import android.os.ParcelFileDescriptor
 import java.io.*
 
 
